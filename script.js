@@ -129,9 +129,10 @@ processBtn.addEventListener("click", () => {
   reader.readAsArrayBuffer(file);
 });
 
-// === Scanner QR Code : start/stop fiables + relance OK ===
-let html5QrCode = null;
+// === Scanner QR Code avec caméra arrière forcée ===
+let html5QrCode;
 let scannerRunning = false;
+let lastScanResult = "Résultat : aucun"; // ⚠️ on garde le dernier résultat
 
 function onDecoded(decodedText) {
   const res = document.getElementById("resultat");
@@ -143,10 +144,15 @@ function onDecoded(decodedText) {
     link.target = "_blank";
     link.textContent = decodedText;
     res.appendChild(link);
-    // Redirection auto
+
+    // 🚀 Redirection auto
     window.open(decodedText, "_blank");
+
+    // 🔒 Sauvegarde du résultat
+    lastScanResult = "Résultat : <a href='" + decodedText + "' target='_blank'>" + decodedText + "</a>";
   } else {
     res.innerHTML += decodedText;
+    lastScanResult = "Résultat : " + decodedText;
   }
 }
 
@@ -155,22 +161,16 @@ function onDecodeError(/* errorMessage */) {
 }
 
 async function startScanner() {
-  const readerId = "reader";
-
-  // (Ré)initialise l'instance si besoin
   if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode(readerId);
+    html5QrCode = new Html5Qrcode("reader");
   } else {
-    // Nettoie l'UI précédente si elle existe
     try { await html5QrCode.clear(); } catch (_) {}
   }
 
-  // Si déjà en cours, on ne double pas
   if (scannerRunning) return;
 
   const config = { fps: 10, qrbox: 250 };
 
-  // 1) Tentative avec facingMode "environment" (arrière)
   try {
     await html5QrCode.start(
       { facingMode: "environment" },
@@ -180,19 +180,15 @@ async function startScanner() {
     );
     scannerRunning = true;
     return;
-  } catch (e) {
-    // Poursuit vers le repli si facingMode indisponible
-  }
+  } catch (e) {}
 
-  // 2) Repli : liste les caméras et choisit l'arrière si identifiable
   try {
     const cameras = await Html5Qrcode.getCameras();
     if (!cameras || !cameras.length) {
       alert("Aucune caméra détectée.");
       return;
     }
-    const back = cameras.find(c => c.label.toLowerCase().includes("back"))
-               || cameras[0];
+    const back = cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
 
     await html5QrCode.start(back.id, config, onDecoded, onDecodeError);
     scannerRunning = true;
@@ -206,10 +202,12 @@ async function stopScanner() {
     try { await html5QrCode.stop(); } catch (_) {}
     try { await html5QrCode.clear(); } catch (_) {}
     scannerRunning = false;
-    document.getElementById("resultat").innerText =
-      "Scanner arrêté. Clique sur 🔄 Relancer pour réactiver.";
+
+    // ⚠️ On conserve le dernier résultat
+    document.getElementById("resultat").innerHTML =
+      lastScanResult + "<br><em>Scanner arrêté. Clique sur 🔄 Relancer pour réactiver.</em>";
   }
 }
 
-// Démarrage auto au chargement
+// 🚀 Démarre automatiquement
 startScanner();
