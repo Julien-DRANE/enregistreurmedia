@@ -56,11 +56,19 @@ function majLien() {
 }
 
 // === Enregistrement audio ===
-const startBtn = document.getElementById("startBtn");
-const stopBtn = document.getElementById("stopBtn");
-const player = document.getElementById("player");
-
 startBtn.addEventListener("click", async () => {
+  // Vérifie que tous les champs sont remplis
+  const nom = document.getElementById("nom").value.trim();
+  const prenom = document.getElementById("prenom").value.trim();
+  const classe = document.getElementById("classe").value.trim();
+  const sujet = document.getElementById("sujet").value.trim();
+
+  if (!nom || !prenom || !classe || !sujet) {
+    alert("⚠️ Merci de remplir Nom, Prénom, Classe et Sujet avant d’enregistrer.");
+    return;
+  }
+
+  // Si tout est bon, on démarre l’enregistrement
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   mediaRecorder = new MediaRecorder(stream);
   mediaRecorder.start();
@@ -84,10 +92,6 @@ startBtn.addEventListener("click", async () => {
 
   startBtn.disabled = true;
   stopBtn.disabled = false;
-});
-
-stopBtn.addEventListener("click", () => {
-  stopRecordingManual();
 });
 
 function stopRecordingManual() {
@@ -214,3 +218,4 @@ async function stopScanner() {
 
 // 🚀 Démarre automatiquement
 startScanner();
+
