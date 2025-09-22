@@ -3,6 +3,29 @@ let audioChunks = [];
 let fileName = "";
 let fileUrl = "";
 
+// Compteur
+let timerInterval;
+let seconds = 0;
+const maxSeconds = 180; // ⏱ Durée max en secondes (3 min)
+
+// === Timer ===
+function updateTimer() {
+  seconds++;
+  const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const secs = String(seconds % 60).padStart(2, "0");
+  document.getElementById("timer").innerText = `⏱ Temps : ${minutes}:${secs}`;
+
+  if (seconds >= maxSeconds) {
+    stopRecordingAuto();
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  seconds = 0;
+  document.getElementById("timer").innerText = "⏱ Temps : 00:00";
+}
+
 // === Générer nom du fichier ===
 function genererNomFichier(extension = "mp3") {
   const nom = document.getElementById("nom").value.trim();
@@ -43,6 +66,9 @@ startBtn.addEventListener("click", async () => {
   mediaRecorder.start();
   audioChunks = [];
 
+  resetTimer();
+  timerInterval = setInterval(updateTimer, 1000);
+
   mediaRecorder.addEventListener("dataavailable", e => {
     audioChunks.push(e.data);
   });
@@ -53,6 +79,7 @@ startBtn.addEventListener("click", async () => {
     fileName = genererNomFichier("mp3");
     player.src = fileUrl;
     majLien();
+    resetTimer();
   });
 
   startBtn.disabled = true;
@@ -60,10 +87,23 @@ startBtn.addEventListener("click", async () => {
 });
 
 stopBtn.addEventListener("click", () => {
+  stopRecordingManual();
+});
+
+function stopRecordingManual() {
   mediaRecorder.stop();
   startBtn.disabled = false;
   stopBtn.disabled = true;
-});
+  clearInterval(timerInterval);
+}
+
+function stopRecordingAuto() {
+  mediaRecorder.stop();
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
+  clearInterval(timerInterval);
+  alert("⏱ Temps maximum atteint (3 minutes). L’enregistrement a été arrêté.");
+}
 
 // === Téléversement fichier existant ===
 const fileInput = document.getElementById("fileInput");
@@ -93,11 +133,13 @@ processBtn.addEventListener("click", () => {
 let html5QrCode;
 
 function startScanner() {
+  if (html5QrCode) {
+    html5QrCode.clear().catch(() => {});
+  }
   html5QrCode = new Html5Qrcode("reader");
 
   Html5Qrcode.getCameras().then(cameras => {
     if (cameras && cameras.length) {
-      // Cherche la caméra arrière
       let backCamera = cameras.find(cam => cam.label.toLowerCase().includes("back"));
       let cameraId = backCamera ? backCamera.id : cameras[0].id;
 
@@ -121,9 +163,7 @@ function startScanner() {
             res.innerHTML += decodedText;
           }
         },
-        errorMessage => {
-          // ignore les erreurs mineures
-        }
+        errorMessage => {}
       );
     }
   }).catch(err => {
@@ -134,10 +174,10 @@ function startScanner() {
 function stopScanner() {
   if (html5QrCode) {
     html5QrCode.stop().then(() => {
-      document.getElementById("resultat").innerText = "Scanner arrêté.";
+      document.getElementById("resultat").innerText = "Scanner arrêté. Clique sur 🔄 Relancer pour réactiver.";
     });
   }
 }
 
-// Démarre automatiquement le scanner à l'ouverture de la page
+// Démarrage auto
 startScanner();
