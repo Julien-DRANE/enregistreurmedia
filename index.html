@@ -37,6 +37,7 @@
     <h2>Enregistre ta chronique</h2>
     <button id="startBtn">▶️ Démarrer</button>
     <button id="stopBtn" disabled>⏹ Arrêter</button>
+    <p id="timer">⏱ Temps : 00:00</p>
     <audio id="player" controls></audio>
   </section>
 
@@ -64,6 +65,7 @@
     <div id="reader"></div>
     <p id="resultat">Résultat : aucun</p>
     <button onclick="stopScanner()">⏹ Arrêter le scanner</button>
+    <button onclick="startScanner()">🔄 Relancer le scanner</button>
   </section>
 
   <script src="script.js"></script>
