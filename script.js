@@ -91,15 +91,30 @@ processBtn.addEventListener("click", () => {
 
 // === Scanner QR Code ===
 let scanner;
+
 function onScanSuccess(decodedText) {
-  document.getElementById("resultat").innerText = "Résultat : " + decodedText;
+  const res = document.getElementById("resultat");
+
+  // Réinitialise l'affichage
+  res.innerHTML = "Résultat : ";
+
+  // Si c'est une URL
   if (decodedText.startsWith("http")) {
-    window.open(decodedText, "_blank");
+    const link = document.createElement("a");
+    link.href = decodedText;
+    link.target = "_blank";
+    link.textContent = decodedText;
+    res.appendChild(link);
+
+    // 👉 Redirection auto (optionnelle)
+    // window.open(decodedText, "_blank");
+  } else {
+    res.innerHTML += decodedText;
   }
 }
 
 function onScanError(errorMessage) {
-  // ignore erreurs mineures
+  // ignore les erreurs mineures
 }
 
 scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
@@ -108,3 +123,4 @@ scanner.render(onScanSuccess, onScanError);
 function stopScanner() {
   scanner.clear();
 }
+
