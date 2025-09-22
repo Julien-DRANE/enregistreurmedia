@@ -59,15 +59,21 @@
   </section>
 
   <!-- Scanner QR Code -->
-  <section>
-    <span class="etape">5️⃣</span>
-    <h2>Scanne le QR Code de dépôt</h2>
-    <p>La caméra arrière s’ouvre automatiquement. Scanne le QR code de dépôt Nextcloud pour déposer ton fichier.</p>
-    <div id="reader"></div>
-    <p id="resultat">Résultat : aucun</p>
-    <button onclick="stopScanner()">⏹ Arrêter le scanner</button>
-    <button onclick="startScanner()">🔄 Relancer le scanner</button>
-  </section>
+<section>
+  <span class="etape">5️⃣</span>
+  <h2>Scanne le QR Code de dépôt</h2>
+  <p>La caméra arrière s’ouvre automatiquement. Scanne le QR code de dépôt Nextcloud pour déposer ton fichier.</p>
+  <div id="reader"></div>
+  <p id="resultat">Résultat : aucun</p>
+  <button onclick="stopScanner()">⏹ Arrêter le scanner</button>
+  <button onclick="startScanner()">🔄 Relancer le scanner</button>
+
+  <!-- 🔽 Ajout champ manuel -->
+  <h3>Ou colle directement ton lien</h3>
+  <input type="text" id="manualLink" placeholder="Colle ici le lien de dépôt">
+  <button onclick="validerLien()">➡️ Ouvrir le lien</button>
+</section>
+
 
   <!-- Footer -->
   <footer>
@@ -78,3 +84,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
