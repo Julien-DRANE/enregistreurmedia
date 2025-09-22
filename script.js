@@ -119,6 +119,17 @@ fileInput.addEventListener("change", () => {
 });
 
 processBtn.addEventListener("click", () => {
+  // Vérifie que tous les champs sont remplis
+  const nom = document.getElementById("nom").value.trim();
+  const prenom = document.getElementById("prenom").value.trim();
+  const classe = document.getElementById("classe").value.trim();
+  const sujet = document.getElementById("sujet").value.trim();
+
+  if (!nom || !prenom || !classe || !sujet) {
+    alert("⚠️ Merci de remplir Nom, Prénom, Classe et Sujet avant de téléverser un fichier.");
+    return;
+  }
+
   const file = fileInput.files[0];
   if (!file) return;
 
@@ -132,6 +143,7 @@ processBtn.addEventListener("click", () => {
   };
   reader.readAsArrayBuffer(file);
 });
+
 
 // === Scanner QR Code ===
 let html5QrCode;
@@ -218,4 +230,5 @@ async function stopScanner() {
 
 // 🚀 Démarre automatiquement
 startScanner();
+
 
