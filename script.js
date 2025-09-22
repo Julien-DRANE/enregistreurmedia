@@ -129,58 +129,87 @@ processBtn.addEventListener("click", () => {
   reader.readAsArrayBuffer(file);
 });
 
-// === Scanner QR Code avec caméra arrière forcée ===
-let html5QrCode;
-let currentCameraId = null;
+// === Scanner QR Code : start/stop fiables + relance OK ===
+let html5QrCode = null;
+let scannerRunning = false;
+
+function onDecoded(decodedText) {
+  const res = document.getElementById("resultat");
+  res.innerHTML = "Résultat : ";
+
+  if (decodedText.startsWith("http")) {
+    const link = document.createElement("a");
+    link.href = decodedText;
+    link.target = "_blank";
+    link.textContent = decodedText;
+    res.appendChild(link);
+    // Redirection auto
+    window.open(decodedText, "_blank");
+  } else {
+    res.innerHTML += decodedText;
+  }
+}
+
+function onDecodeError(/* errorMessage */) {
+  // erreurs mineures ignorées
+}
 
 async function startScanner() {
+  const readerId = "reader";
+
+  // (Ré)initialise l'instance si besoin
   if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode = new Html5Qrcode(readerId);
   } else {
-    await html5QrCode.clear().catch(() => {});
+    // Nettoie l'UI précédente si elle existe
+    try { await html5QrCode.clear(); } catch (_) {}
   }
 
-  const cameras = await Html5Qrcode.getCameras();
-  if (cameras && cameras.length) {
-    let backCamera = cameras.find(cam => cam.label.toLowerCase().includes("back"));
-    currentCameraId = backCamera ? backCamera.id : cameras[0].id;
+  // Si déjà en cours, on ne double pas
+  if (scannerRunning) return;
 
-    html5QrCode.start(
-      currentCameraId,
-      { fps: 10, qrbox: 250 },
-      decodedText => {
-        const res = document.getElementById("resultat");
-        res.innerHTML = "Résultat : ";
+  const config = { fps: 10, qrbox: 250 };
 
-        if (decodedText.startsWith("http")) {
-          const link = document.createElement("a");
-          link.href = decodedText;
-          link.target = "_blank";
-          link.textContent = decodedText;
-          res.appendChild(link);
+  // 1) Tentative avec facingMode "environment" (arrière)
+  try {
+    await html5QrCode.start(
+      { facingMode: "environment" },
+      config,
+      onDecoded,
+      onDecodeError
+    );
+    scannerRunning = true;
+    return;
+  } catch (e) {
+    // Poursuit vers le repli si facingMode indisponible
+  }
 
-          // 🚀 Redirection auto
-          window.open(decodedText, "_blank");
-        } else {
-          res.innerHTML += decodedText;
-        }
-      },
-      errorMessage => {}
-    ).catch(err => {
-      alert("Erreur au démarrage du scanner : " + err);
-    });
-  } else {
-    alert("Aucune caméra détectée.");
+  // 2) Repli : liste les caméras et choisit l'arrière si identifiable
+  try {
+    const cameras = await Html5Qrcode.getCameras();
+    if (!cameras || !cameras.length) {
+      alert("Aucune caméra détectée.");
+      return;
+    }
+    const back = cameras.find(c => c.label.toLowerCase().includes("back"))
+               || cameras[0];
+
+    await html5QrCode.start(back.id, config, onDecoded, onDecodeError);
+    scannerRunning = true;
+  } catch (err) {
+    alert("Erreur au démarrage du scanner : " + err);
   }
 }
 
 async function stopScanner() {
-  if (html5QrCode && currentCameraId) {
-    await html5QrCode.stop().catch(() => {});
+  if (html5QrCode && scannerRunning) {
+    try { await html5QrCode.stop(); } catch (_) {}
+    try { await html5QrCode.clear(); } catch (_) {}
+    scannerRunning = false;
     document.getElementById("resultat").innerText =
       "Scanner arrêté. Clique sur 🔄 Relancer pour réactiver.";
   }
 }
 
-// 🚀 Démarre automatiquement
+// Démarrage auto au chargement
 startScanner();
