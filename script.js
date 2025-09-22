@@ -56,6 +56,10 @@ function majLien() {
 }
 
 // === Enregistrement audio ===
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+const player = document.getElementById("player");
+
 startBtn.addEventListener("click", async () => {
   // Vérifie que tous les champs sont remplis
   const nom = document.getElementById("nom").value.trim();
@@ -92,6 +96,10 @@ startBtn.addEventListener("click", async () => {
 
   startBtn.disabled = true;
   stopBtn.disabled = false;
+});
+
+stopBtn.addEventListener("click", () => {
+  stopRecordingManual();
 });
 
 function stopRecordingManual() {
@@ -143,7 +151,6 @@ processBtn.addEventListener("click", () => {
   };
   reader.readAsArrayBuffer(file);
 });
-
 
 // === Scanner QR Code ===
 let html5QrCode;
@@ -231,4 +238,31 @@ async function stopScanner() {
 // 🚀 Démarre automatiquement
 startScanner();
 
+// === Lien manuel ===
+function validerLien() {
+  const input = document.getElementById("manualLink").value.trim();
+  if (!input) {
+    alert("⚠️ Merci de coller un lien avant de valider.");
+    return;
+  }
 
+  const res = document.getElementById("resultat");
+  res.innerHTML = "Résultat : ";
+
+  if (input.startsWith("http")) {
+    const link = document.createElement("a");
+    link.href = input;
+    link.target = "_blank";
+    link.textContent = input;
+    res.appendChild(link);
+
+    // 🚀 Ouvre le lien
+    window.open(input, "_blank");
+
+    // 🔒 Mémorise dans le résultat
+    lastScanResult = "Résultat : <a href='" + input + "' target='_blank'>" + input + "</a>";
+  } else {
+    res.innerHTML += input;
+    lastScanResult = "Résultat : " + input;
+  }
+}
