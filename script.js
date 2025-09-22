@@ -235,8 +235,6 @@ async function stopScanner() {
   }
 }
 
-// 🚀 Démarre automatiquement
-startScanner();
 
 // === Lien manuel ===
 function validerLien() {
@@ -266,3 +264,4 @@ function validerLien() {
     lastScanResult = "Résultat : " + input;
   }
 }
+
