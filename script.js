@@ -142,7 +142,6 @@ async function startScanner() {
 
   const cameras = await Html5Qrcode.getCameras();
   if (cameras && cameras.length) {
-    // Cherche la caméra arrière
     let backCamera = cameras.find(cam => cam.label.toLowerCase().includes("back"));
     currentCameraId = backCamera ? backCamera.id : cameras[0].id;
 
@@ -166,9 +165,7 @@ async function startScanner() {
           res.innerHTML += decodedText;
         }
       },
-      errorMessage => {
-        // On ignore les erreurs mineures
-      }
+      errorMessage => {}
     ).catch(err => {
       alert("Erreur au démarrage du scanner : " + err);
     });
