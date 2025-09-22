@@ -106,8 +106,8 @@ function onScanSuccess(decodedText) {
     link.textContent = decodedText;
     res.appendChild(link);
 
-    // 👉 Redirection auto (optionnelle)
-    // window.open(decodedText, "_blank");
+    // 👉 Redirection automatique
+    window.open(decodedText, "_blank");
   } else {
     res.innerHTML += decodedText;
   }
@@ -123,4 +123,3 @@ scanner.render(onScanSuccess, onScanError);
 function stopScanner() {
   scanner.clear();
 }
-
