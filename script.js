@@ -131,53 +131,59 @@ processBtn.addEventListener("click", () => {
 
 // === Scanner QR Code avec caméra arrière forcée ===
 let html5QrCode;
+let currentCameraId = null;
 
-function startScanner() {
-  if (html5QrCode) {
-    html5QrCode.clear().catch(() => {});
+async function startScanner() {
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("reader");
+  } else {
+    await html5QrCode.clear().catch(() => {});
   }
-  html5QrCode = new Html5Qrcode("reader");
 
-  Html5Qrcode.getCameras().then(cameras => {
-    if (cameras && cameras.length) {
-      let backCamera = cameras.find(cam => cam.label.toLowerCase().includes("back"));
-      let cameraId = backCamera ? backCamera.id : cameras[0].id;
+  const cameras = await Html5Qrcode.getCameras();
+  if (cameras && cameras.length) {
+    // Cherche la caméra arrière
+    let backCamera = cameras.find(cam => cam.label.toLowerCase().includes("back"));
+    currentCameraId = backCamera ? backCamera.id : cameras[0].id;
 
-      html5QrCode.start(
-        cameraId,
-        { fps: 10, qrbox: 250 },
-        decodedText => {
-          const res = document.getElementById("resultat");
-          res.innerHTML = "Résultat : ";
+    html5QrCode.start(
+      currentCameraId,
+      { fps: 10, qrbox: 250 },
+      decodedText => {
+        const res = document.getElementById("resultat");
+        res.innerHTML = "Résultat : ";
 
-          if (decodedText.startsWith("http")) {
-            const link = document.createElement("a");
-            link.href = decodedText;
-            link.target = "_blank";
-            link.textContent = decodedText;
-            res.appendChild(link);
+        if (decodedText.startsWith("http")) {
+          const link = document.createElement("a");
+          link.href = decodedText;
+          link.target = "_blank";
+          link.textContent = decodedText;
+          res.appendChild(link);
 
-            // 🚀 Redirection auto
-            window.open(decodedText, "_blank");
-          } else {
-            res.innerHTML += decodedText;
-          }
-        },
-        errorMessage => {}
-      );
-    }
-  }).catch(err => {
-    alert("Impossible d’accéder à la caméra : " + err);
-  });
-}
-
-function stopScanner() {
-  if (html5QrCode) {
-    html5QrCode.stop().then(() => {
-      document.getElementById("resultat").innerText = "Scanner arrêté. Clique sur 🔄 Relancer pour réactiver.";
+          // 🚀 Redirection auto
+          window.open(decodedText, "_blank");
+        } else {
+          res.innerHTML += decodedText;
+        }
+      },
+      errorMessage => {
+        // On ignore les erreurs mineures
+      }
+    ).catch(err => {
+      alert("Erreur au démarrage du scanner : " + err);
     });
+  } else {
+    alert("Aucune caméra détectée.");
   }
 }
 
-// Démarrage auto
+async function stopScanner() {
+  if (html5QrCode && currentCameraId) {
+    await html5QrCode.stop().catch(() => {});
+    document.getElementById("resultat").innerText =
+      "Scanner arrêté. Clique sur 🔄 Relancer pour réactiver.";
+  }
+}
+
+// 🚀 Démarre automatiquement
 startScanner();
