@@ -1,0 +1,48 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: #f9f9f9;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  color: #222;
+}
+
+section {
+  background: white;
+  padding: 15px;
+  margin: 15px auto;
+  border-radius: 8px;
+  width: 80%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+input {
+  display: block;
+  margin: 8px 0;
+  padding: 8px;
+  width: 95%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  margin: 5px;
+  padding: 10px 15px;
+  border: none;
+  background: #0077cc;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: gray;
+}
+
+audio {
+  margin-top: 10px;
+  width: 100%;
+}

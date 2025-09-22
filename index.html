@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Webradio - Dépôt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #f7f7f7; }
+    h1 { color: #222; }
+    section { background: white; padding: 15px; margin: 15px auto; border-radius: 8px; width: 95%; max-width: 500px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: left; }
+    h2 { font-size: 18px; margin-bottom: 10px; }
+    input, button { width: 95%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+    button { background: #0077cc; color: white; border: none; cursor: pointer; }
+    button:disabled { background: gray; }
+    audio { width: 100%; margin-top: 10px; }
+    #reader { width: 90%; margin: auto; }
+    .etape { font-weight: bold; font-size: 20px; color: #0077cc; }
+  </style>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+  <h1>🎙 Dépôt de chronique Webradio</h1>
+
+  <!-- Identité -->
+  <section>
+    <span class="etape">1️⃣</span>
+    <h2>Remplis tes informations</h2>
+    <input type="text" id="nom" placeholder="Nom">
+    <input type="text" id="prenom" placeholder="Prénom">
+    <input type="text" id="classe" placeholder="Classe (ex : 3A)">
+    <input type="text" id="sujet" placeholder="Sujet de la chronique">
+  </section>
+
+  <!-- Enregistrement -->
+  <section>
+    <span class="etape">2️⃣</span>
+    <h2>Enregistre ta chronique</h2>
+    <button id="startBtn">▶️ Démarrer</button>
+    <button id="stopBtn" disabled>⏹ Arrêter</button>
+    <audio id="player" controls></audio>
+  </section>
+
+  <!-- Téléversement fichier -->
+  <section>
+    <span class="etape">3️⃣</span>
+    <h2>OU téléverse un fichier existant</h2>
+    <input type="file" id="fileInput" accept="audio/*">
+    <button id="processFile" disabled>✅ Renommer</button>
+    <audio id="uploadedPlayer" controls></audio>
+  </section>
+
+  <!-- Résumé -->
+  <section>
+    <span class="etape">4️⃣</span>
+    <h2>Télécharge ton fichier renommé</h2>
+    <ul id="liens"></ul>
+  </section>
+
+  <!-- Scanner QR Code -->
+  <section>
+    <span class="etape">5️⃣</span>
+    <h2>Scanne le QR Code de dépôt</h2>
+    <p>Autorise la caméra, scanne le QR code du dépôt Nextcloud, et dépose ton fichier renommé.</p>
+    <div id="reader"></div>
+    <p id="resultat">Résultat : aucun</p>
+    <button onclick="stopScanner()">⏹ Arrêter le scanner</button>
+  </section>
+
+</body>
+<script src="script.js"></script>
+</html>
