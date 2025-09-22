@@ -89,37 +89,55 @@ processBtn.addEventListener("click", () => {
   reader.readAsArrayBuffer(file);
 });
 
-// === Scanner QR Code ===
-let scanner;
+// === Scanner QR Code avec caméra arrière forcée ===
+let html5QrCode;
 
-function onScanSuccess(decodedText) {
-  const res = document.getElementById("resultat");
+function startScanner() {
+  html5QrCode = new Html5Qrcode("reader");
 
-  // Réinitialise l'affichage
-  res.innerHTML = "Résultat : ";
+  Html5Qrcode.getCameras().then(cameras => {
+    if (cameras && cameras.length) {
+      // Cherche la caméra arrière
+      let backCamera = cameras.find(cam => cam.label.toLowerCase().includes("back"));
+      let cameraId = backCamera ? backCamera.id : cameras[0].id;
 
-  // Si c'est une URL
-  if (decodedText.startsWith("http")) {
-    const link = document.createElement("a");
-    link.href = decodedText;
-    link.target = "_blank";
-    link.textContent = decodedText;
-    res.appendChild(link);
+      html5QrCode.start(
+        cameraId,
+        { fps: 10, qrbox: 250 },
+        decodedText => {
+          const res = document.getElementById("resultat");
+          res.innerHTML = "Résultat : ";
 
-    // 👉 Redirection automatique
-    window.open(decodedText, "_blank");
-  } else {
-    res.innerHTML += decodedText;
+          if (decodedText.startsWith("http")) {
+            const link = document.createElement("a");
+            link.href = decodedText;
+            link.target = "_blank";
+            link.textContent = decodedText;
+            res.appendChild(link);
+
+            // 🚀 Redirection auto
+            window.open(decodedText, "_blank");
+          } else {
+            res.innerHTML += decodedText;
+          }
+        },
+        errorMessage => {
+          // ignore les erreurs mineures
+        }
+      );
+    }
+  }).catch(err => {
+    alert("Impossible d’accéder à la caméra : " + err);
+  });
+}
+
+function stopScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => {
+      document.getElementById("resultat").innerText = "Scanner arrêté.";
+    });
   }
 }
 
-function onScanError(errorMessage) {
-  // ignore les erreurs mineures
-}
-
-scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-scanner.render(onScanSuccess, onScanError);
-
-function stopScanner() {
-  scanner.clear();
-}
+// Démarre automatiquement le scanner à l'ouverture de la page
+startScanner();
