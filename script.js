@@ -129,7 +129,7 @@ processBtn.addEventListener("click", () => {
   reader.readAsArrayBuffer(file);
 });
 
-// === Scanner QR Code avec caméra arrière forcée ===
+// === Scanner QR Code ===
 let html5QrCode;
 let scannerRunning = false;
 let lastScanResult = "Résultat : aucun"; // ⚠️ on garde le dernier résultat
@@ -148,7 +148,6 @@ function onDecoded(decodedText) {
     // 🚀 Redirection auto
     window.open(decodedText, "_blank");
 
-    // 🔒 Sauvegarde du résultat
     lastScanResult = "Résultat : <a href='" + decodedText + "' target='_blank'>" + decodedText + "</a>";
   } else {
     res.innerHTML += decodedText;
@@ -172,6 +171,7 @@ async function startScanner() {
   const config = { fps: 10, qrbox: 250 };
 
   try {
+    // 🔹 1. Essaye la caméra arrière
     await html5QrCode.start(
       { facingMode: "environment" },
       config,
@@ -180,20 +180,24 @@ async function startScanner() {
     );
     scannerRunning = true;
     return;
-  } catch (e) {}
+  } catch (e) {
+    console.warn("⚠️ Caméra arrière indisponible, fallback sur autre caméra.", e);
+  }
 
   try {
+    // 🔹 2. Fallback : première caméra dispo
     const cameras = await Html5Qrcode.getCameras();
     if (!cameras || !cameras.length) {
-      alert("Aucune caméra détectée.");
+      alert("❌ Aucune caméra détectée.");
       return;
     }
+
     const back = cameras.find(c => c.label.toLowerCase().includes("back")) || cameras[0];
 
     await html5QrCode.start(back.id, config, onDecoded, onDecodeError);
     scannerRunning = true;
   } catch (err) {
-    alert("Erreur au démarrage du scanner : " + err);
+    alert("❌ Impossible de démarrer le scanner : " + err);
   }
 }
 
@@ -203,7 +207,6 @@ async function stopScanner() {
     try { await html5QrCode.clear(); } catch (_) {}
     scannerRunning = false;
 
-    // ⚠️ On conserve le dernier résultat
     document.getElementById("resultat").innerHTML =
       lastScanResult + "<br><em>Scanner arrêté. Clique sur 🔄 Relancer pour réactiver.</em>";
   }
